@@ -98,6 +98,23 @@ def encode_message(message: str, codes: dict) -> str:
     return "".join(codes[char] for char in message)
 
 
+# Decode a message
+def decode_message(encoded: str, root: Node) -> str:
+    decoded = []
+    current = root
+    for bit in encoded:
+        if bit == "0":
+            current = current.get_left()
+        else:
+            current = current.get_right()
+
+        # If we hit a leaf node, append symbol
+        if current.get_symbol() is not None:
+            decoded.append(current.get_symbol())
+            current = root
+    return "".join(decoded)
+
+
 # Example usage
 if __name__ == "__main__":
     message_to_compress = "HELLO WORLD"
@@ -114,8 +131,10 @@ if __name__ == "__main__":
     print("Root left:", huffman_tree.get_left())
     print("Root right:", huffman_tree.get_right())
 
-    codes = generate_codes(huffman_tree)
-    print("Codes:", codes)
+    # Encode message
+    encoded = encode_message(filtered, table)
+    print("Encoded message:", encoded)
 
-    compressed = encode_message(filtered, codes)
-    print("Compressed bitstring:", compressed)
+    # Decode message
+    decoded = decode_message(encoded, table)
+    print("Decoded message:", decoded)
