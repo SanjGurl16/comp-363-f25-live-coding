@@ -20,42 +20,44 @@ class Node:
     def get_symbol(self) -> chr:
         return self.__symbol
 
-    def __str__(self):
-        return f"({self.__symbol}:{self.__frequency})"
-
-    def __repr__(self):
-        return self.__str__()
-
     def get_left(self):
         return self.__left
 
     def get_right(self):
         return self.__right
 
-    ASCII_SYMBOLS: int = 256
+    def __str__(self):
+        return f"({self.__symbol}:{self.__frequency})"
+
+    def __repr__(self):
+        return self.__str__()
 
 
-def frequency_of_symbols(message: str) -> list[int]:
-    frequencies = [0] * ASCII_SYMBOLS
-    for char in message:
-        ascii_value = ord(char)
-        frequencies[ascii_value] += 1
-    return frequencies
-
-
-def filter_uppercase_and_spaces(input_string):
+# Filter message
+def filter_uppercase_and_spaces(input_string: str) -> str:
     return "".join([char for char in input_string if char.isupper() or char == " "])
 
 
-def create_forest(frequencies):
+# Count frequencies
+def count_frequencies(message: str) -> list[int]:
+    ASCII_SYMBOLS = 256
+    frequencies = [0] * ASCII_SYMBOLS
+    for char in message:
+        frequencies[ord(char)] += 1
+    return frequencies
+
+
+# Initialize forest
+def initialize_forest(frequencies):
     forest = []
-    for ascii in range(len(frequencies)):
-        if frequencies[ascii] > 0:
-            new_node = Node(frequencies[ascii], chr(ascii))
+    for ascii_val in range(len(frequencies)):
+        if frequencies[ascii_val] > 0:
+            new_node = Node(frequencies[ascii_val], chr(ascii_val))
             forest.append(new_node)
     return forest
 
 
+# Helper to get smallest node
 def get_smallest(forest):
     smallest_index = 0
     for i in range(1, len(forest)):
@@ -64,7 +66,8 @@ def get_smallest(forest):
     return forest.pop(smallest_index)
 
 
-def huffman(forest):
+# Build Huffman tree
+def build_huffman_tree(forest):
     while len(forest) > 1:
         s1 = get_smallest(forest)
         s2 = get_smallest(forest)
@@ -75,16 +78,44 @@ def huffman(forest):
     return forest[0]
 
 
-message_to_compress = "HELLO WORLD"
-filtered = filter_uppercase_and_spaces(message_to_compress)
+# Generate Huffman codes
+def generate_codes(node: Node, prefix: str = "", code_map=None) -> dict:
+    if code_map is None:
+        code_map = {}
 
-frequencies = frequency_of_symbols(filtered)
-print("Frequencies:", frequencies)
+    if node.get_symbol() is not None:  # Leaf node
+        code_map[node.get_symbol()] = prefix
+    else:
+        if node.get_left():
+            generate_codes(node.get_left(), prefix + "0", code_map)
+        if node.get_right():
+            generate_codes(node.get_right(), prefix + "1", code_map)
+    return code_map
 
-forest = create_forest(frequencies)
-print("Forest:", forest)
 
-huffman_tree = huffman(forest)
-print("Root node:", huffman_tree)
-print("Root left:", huffman_tree.get_left())
-print("Root right:", huffman_tree.get_right())
+# Encode a message
+def encode_message(message: str, codes: dict) -> str:
+    return "".join(codes[char] for char in message)
+
+
+# Example usage
+if __name__ == "__main__":
+    message_to_compress = "HELLO WORLD"
+    filtered = filter_uppercase_and_spaces(message_to_compress)
+
+    frequencies = count_frequencies(filtered)
+    print("Frequencies:", frequencies)
+
+    forest = initialize_forest(frequencies)
+    print("Forest:", forest)
+
+    huffman_tree = build_huffman_tree(forest)
+    print("Root node:", huffman_tree)
+    print("Root left:", huffman_tree.get_left())
+    print("Root right:", huffman_tree.get_right())
+
+    codes = generate_codes(huffman_tree)
+    print("Codes:", codes)
+
+    compressed = encode_message(filtered, codes)
+    print("Compressed bitstring:", compressed)
