@@ -140,5 +140,5 @@ if __name__ == "__main__":
     print("Encoded message:", encoded)
 
     # Decode message
-    decoded = decode_message(encoded, table)
+    decoded = decode_message(encoded, huffman_tree)
     print("Decoded message:", decoded)
