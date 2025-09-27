@@ -131,6 +131,10 @@ if __name__ == "__main__":
     print("Root left:", huffman_tree.get_left())
     print("Root right:", huffman_tree.get_right())
 
+    # Generate the Huffman table
+    table = Node.generate_codes(huffman_tree)
+    print("Huffman Table:", table)
+
     # Encode message
     encoded = encode_message(filtered, table)
     print("Encoded message:", encoded)
